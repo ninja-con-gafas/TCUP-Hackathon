@@ -1,6 +1,6 @@
 import json
 from sys import argv
-from setup.MQTT import MQTT, Publisher
+from setup.MQTT import MQTT
 import random
 import time
 
@@ -71,9 +71,9 @@ class DataGenerator:
             if self.verbose:
                 print(f"{self.topic}:{payload}")
 
-            Publisher(client).publish(mqtt_topic=self.topic,
-                                      payload=payload,
-                                      quality_of_service=0)
+            mqtt.publish(mqtt_topic=self.topic,
+                         payload=payload,
+                         quality_of_service=0)
             time.sleep(interval_secs)
 
 

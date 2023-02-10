@@ -45,31 +45,21 @@ class MQTT:
                                  bind_port=self.bind_port,
                                  properties=self.properties)
 
-
-class Publisher:
-    def __init__(self, mqtt_client) -> None:
-        self.client = mqtt_client
-
     def publish(self,
                 mqtt_topic: str,
                 payload: str,
                 quality_of_service: int,
                 retain: bool = False,
                 properties: Any = None) -> MQTTMessageInfo:
-        return self.client.publish(topic=mqtt_topic,
-                                   payload=payload,
-                                   qos=quality_of_service,
-                                   retain=retain,
-                                   properties=properties)
-
-
-class Subscriber:
-    def __init__(self, mqtt_client) -> None:
-        self.client = mqtt_client
+        return self.mqtt_client.publish(topic=mqtt_topic,
+                                        payload=payload,
+                                        qos=quality_of_service,
+                                        retain=retain,
+                                        properties=properties)
 
     def print_message(self, mqtt_topic: str) -> None:
         def on_message(client_: Client, userdata: Any, message: MQTTMessage):
             print(f"Message: {message.payload.decode()}")
 
-        self.client.subscribe(mqtt_topic)
-        self.client.on_message = on_message
+        self.mqtt_client.subscribe(mqtt_topic)
+        self.mqtt_client.on_message = on_message
