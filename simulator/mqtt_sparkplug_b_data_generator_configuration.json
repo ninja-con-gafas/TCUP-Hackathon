@@ -1,0 +1,160 @@
+{
+  "mqtt": {
+    "host": "127.0.0.1",
+    "port": 1883
+  },
+  "miscellaneous": {
+    "interval_ms": 1000,
+    "verbose": true
+  },
+  "mqtt_spb_entity_devices": {
+    "configuration": {
+      "debug_info": true,
+      "filter_cmd_msg": true,
+      "spb_eon_name": "sensors",
+      "spb_group_name": "ice_plant"
+    },
+    "devices": {
+      "device_1": {
+        "attributes": {
+          "device_id": "device_1",
+          "device_type": "voltmeter",
+          "lat": 18.5790,
+          "lng": 73.6837,
+          "unit": "V",
+          "description": "Compressor"
+        },
+        "range": [
+          220.000,
+          230.000
+        ]
+      },
+      "device_2": {
+        "attributes": {
+          "device_id": "device_2",
+          "device_type": "ammeter",
+          "lat": 18.5790,
+          "lng": 73.6837,
+          "unit": "A",
+          "description": "Compressor"
+        },
+        "range": [
+          45.000,
+          50.000
+        ]
+      },
+      "device_3": {
+        "attributes": {
+          "device_id": "device_3",
+          "device_type": "pressure_sensor",
+          "lat": 18.5790,
+          "lng": 73.6837,
+          "unit": "bar",
+          "description": "Compressor inlet pressure"
+        },
+        "range": [
+          0.450,
+          0.550
+        ]
+      },
+      "device_4": {
+        "attributes": {
+          "device_id": "device_4",
+          "device_type": "pressure_sensor",
+          "lat": 18.5790,
+          "lng": 73.6837,
+          "unit": "bar",
+          "description": "Compressor outlet pressure"
+        },
+        "range": [
+          9.500,
+          10.000
+        ]
+      },
+      "device_5": {
+        "attributes": {
+          "device_id": "device_5",
+          "device_type": "temperature_sensor",
+          "lat": 18.5790,
+          "lng": 73.6837,
+          "unit": "C",
+          "description": "Compressor outlet temperature"
+        },
+        "range": [
+          52.000,
+          55.000
+        ]
+      },
+      "device_6": {
+        "attributes": {
+          "device_id": "device_6",
+          "device_type": "temperature_sensor",
+          "lat": 18.5790,
+          "lng": 73.6837,
+          "unit": "C",
+          "description": "Condenser outlet temperature"
+        },
+        "range": [
+          29.000,
+          31.000
+        ]
+      },
+      "device_7": {
+        "attributes": {
+          "device_id": "device_7",
+          "device_type": "flow_meter",
+          "lat": 18.5790,
+          "lng": 73.6837,
+          "unit": "liter per hour",
+          "description": "Condenser outlet flow"
+        },
+        "range": [
+          3.000,
+          3.300
+        ]
+      },
+      "device_8": {
+        "attributes": {
+          "device_id": "device_8",
+          "device_type": "temperature_sensor",
+          "lat": 18.5790,
+          "lng": 73.6837,
+          "unit": "C",
+          "description": "Thermal expansion valve outlet temperature"
+        },
+        "range": [
+          -15.000,
+          -16.000
+        ]
+      },
+      "device_9": {
+        "attributes": {
+          "device_id": "device_9",
+          "device_type": "temperature_sensor",
+          "lat": 18.5790,
+          "lng": 73.6837,
+          "unit": "C",
+          "description": "Brine temperature"
+        },
+        "range": [
+          -4.000,
+          -5.000
+        ]
+      },
+      "device_10": {
+        "attributes": {
+          "device_id": "device_10",
+          "device_type": "temperature_sensor",
+          "lat": 18.5790,
+          "lng": 73.6837,
+          "unit": "C",
+          "description": "Evaporator outlet temperature"
+        },
+        "range": [
+          -5.000,
+          -6.000
+        ]
+      }
+    }
+  }
+}

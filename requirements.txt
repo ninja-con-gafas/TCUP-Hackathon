@@ -1,2 +1,2 @@
-paho-mqtt
-mqtt-spb-wrapper
+paho-mqtt == 1.6.1
+mqtt-spb-wrapper == 1.0.16

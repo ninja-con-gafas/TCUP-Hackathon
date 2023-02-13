@@ -1,108 +1,123 @@
 {
-  "mqtt":
-  {
-    "username": null,
-    "password": null,
+  "mqtt": {
     "host": "127.0.0.1",
     "port": 1883,
     "topic": "ice_plant"
   },
-  "miscellaneous":
-  {
+  "miscellaneous": {
     "interval_ms": 1000,
     "verbose": true
   },
-  "sensors":
-  {
-    "sensor_1":
-    {
+  "sensors": {
+    "sensor_1": {
       "sensor_type": "voltmeter",
       "lat": 18.5790,
       "lng": 73.6837,
       "unit": "V",
       "description": "Compressor",
-      "range": [220.000, 230.000]
+      "range": [
+        220.000,
+        230.000
+      ]
     },
-    "sensor_2":
-    {
+    "sensor_2": {
       "sensor_type": "ammeter",
       "lat": 18.5790,
       "lng": 73.6837,
       "unit": "A",
       "description": "Compressor",
-      "range": [45.000, 50.000]
+      "range": [
+        45.000,
+        50.000
+      ]
     },
-    "sensor_3":
-    {
+    "sensor_3": {
       "sensor_type": "pressure_sensor",
       "lat": 18.5790,
       "lng": 73.6837,
       "unit": "bar",
       "description": "Compressor inlet pressure",
-      "range": [0.450, 0.550]
+      "range": [
+        0.450,
+        0.550
+      ]
     },
-    "sensor_4":
-    {
+    "sensor_4": {
       "sensor_type": "pressure_sensor",
       "lat": 18.5790,
       "lng": 73.6837,
       "unit": "bar",
       "description": "Compressor outlet pressure",
-      "range": [9.500, 10.000]
+      "range": [
+        9.500,
+        10.000
+      ]
     },
-    "sensor_5":
-    {
+    "sensor_5": {
       "sensor_type": "temperature_sensor",
       "lat": 18.5790,
       "lng": 73.6837,
       "unit": "C",
       "description": "Compressor outlet temperature",
-      "range": [52.000, 55.000]
+      "range": [
+        52.000,
+        55.000
+      ]
     },
-    "sensor_6":
-    {
+    "sensor_6": {
       "sensor_type": "temperature_sensor",
       "lat": 18.5790,
       "lng": 73.6837,
       "unit": "C",
       "description": "Condenser outlet temperature",
-      "range": [29.000, 31.000]
+      "range": [
+        29.000,
+        31.000
+      ]
     },
-    "sensor_7":
-    {
+    "sensor_7": {
       "sensor_type": "flow_meter",
       "lat": 18.5790,
       "lng": 73.6837,
       "unit": "liter per hour",
       "description": "Condenser outlet flow",
-      "range": [3.000, 3.300]
+      "range": [
+        3.000,
+        3.300
+      ]
     },
-    "sensor_8":
-    {
+    "sensor_8": {
       "sensor_type": "temperature_sensor",
       "lat": 18.5790,
       "lng": 73.6837,
       "unit": "C",
       "description": "Thermal expansion valve outlet temperature",
-      "range": [-15.000, -16.000]
+      "range": [
+        -15.000,
+        -16.000
+      ]
     },
-    "sensor_9":
-    {
+    "sensor_9": {
       "sensor_type": "temperature_sensor",
       "lat": 18.5790,
       "lng": 73.6837,
       "unit": "C",
       "description": "Brine temperature",
-      "range": [-4.000, -5.000]
+      "range": [
+        -4.000,
+        -5.000
+      ]
     },
-    "sensor_10":
-    {
+    "sensor_10": {
       "sensor_type": "temperature_sensor",
       "lat": 18.5790,
       "lng": 73.6837,
       "unit": "C",
       "description": "Evaporator outlet temperature",
-      "range": [-5.000, -6.000]
+      "range": [
+        -5.000,
+        -6.000
+      ]
     }
   }
 }

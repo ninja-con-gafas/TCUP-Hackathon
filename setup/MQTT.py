@@ -16,7 +16,7 @@ class MQTT:
                  bind_address: str = "",
                  bind_port: int = 0,
                  properties: Any = None
-                 ) -> None:
+                 ):
         self.client_id = client_id
         self.clean_session = clean_session
         self.userdata = userdata
