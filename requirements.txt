@@ -1,0 +1,2 @@
+paho-mqtt
+mqtt-spb-wrapper
