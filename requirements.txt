@@ -1,2 +1,3 @@
-paho-mqtt == 1.6.1
 mqtt-spb-wrapper == 1.0.16
+paho-mqtt == 1.6.1
+pyspark == 2.4.0

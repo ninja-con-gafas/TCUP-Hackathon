@@ -1,6 +1,6 @@
 import json
 from sys import argv
-from setup.MQTTSparkplugB import MQTTSparkplugB
+from wrapper.MQTTSparkplugB import MQTTSparkplugB
 import random
 import time
 

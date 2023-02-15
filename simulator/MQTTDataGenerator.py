@@ -1,6 +1,6 @@
 import json
 from sys import argv
-from setup.MQTT import MQTT
+from wrapper.MQTT import MQTT
 import random
 import time
 
