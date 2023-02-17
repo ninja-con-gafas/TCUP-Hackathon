@@ -4,12 +4,12 @@
     "port": 1883
   },
   "miscellaneous": {
-    "interval_ms": 1000,
-    "verbose": true
+    "interval_ms": 100,
+    "verbose": false
   },
   "mqtt_spb_entity_devices": {
     "configuration": {
-      "debug_info": true,
+      "debug_info": false,
       "filter_cmd_msg": true,
       "spb_eon_name": "sensors",
       "spb_group_name": "ice_plant"

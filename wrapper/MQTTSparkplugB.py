@@ -36,7 +36,7 @@ class MQTTSparkplugB:
         self.spb_group_name = spb_group_name
         self.spb_scada_name = spb_scada_name
         self.topic_str = topic_str
-        self.entity = None
+        self.entity: Any = None
 
         self.host = host
         self.port = port
@@ -101,7 +101,7 @@ class MQTTSparkplugB:
                                            value=value,
                                            timestamp=timestamp)
 
-    def connect(self) -> bool:
+    def connect_mqtt_broker(self) -> bool:
         return self.entity.connect(host=self.host,
                                    port=self.port,
                                    user=self.user,
@@ -119,13 +119,13 @@ class MQTTSparkplugB:
         self.entity.disconnet()
 
     def print_message(self) -> None:
-        def on_message(topic, payload):
+        def on_message(topic, payload) -> None:
             print(f"{topic}: {payload}")
 
         self.entity.on_message = on_message
 
     def print_command(self) -> None:
-        def on_command(payload):
+        def on_command(payload) -> None:
             print(f"payload: {payload}")
 
         self.entity.pn_command = on_command

@@ -1,8 +1,9 @@
-import json
+from json import load, dumps
+from random import choice, uniform
 from sys import argv
+from time import sleep
+from typing import Dict
 from wrapper.MQTT import MQTT
-import random
-import time
 
 
 class MQTTDataGenerator:
@@ -11,18 +12,18 @@ class MQTTDataGenerator:
         try:
             with open(file=configuration_file_path,
                       mode='r') as configuration_file:
-                configurations = json.load(configuration_file)
-                mqtt_configuration = configurations.get("mqtt")
-                miscellaneous_configuration = configurations.get("miscellaneous")
+                configurations: Dict = load(configuration_file)
+                mqtt_configuration: Dict = configurations.get("mqtt")
+                miscellaneous_configuration: Dict = configurations.get("miscellaneous")
 
-                self.host = mqtt_configuration.get("host")
-                self.port = mqtt_configuration.get("port")
-                self.topic = mqtt_configuration.get("topic")
+                self.host: str = mqtt_configuration.get("host")
+                self.port: int = mqtt_configuration.get("port")
+                self.topic: str = mqtt_configuration.get("topic")
 
-                self.interval_ms = miscellaneous_configuration.get("interval_ms")
-                self.verbose = miscellaneous_configuration.get("verbose")
+                self.interval_ms: float = miscellaneous_configuration.get("interval_ms")
+                self.verbose: bool = miscellaneous_configuration.get("verbose")
 
-                self.sensors = configurations.get("sensors")
+                self.sensors: Dict = configurations.get("sensors")
 
         except IOError as error:
             print(f"Error opening the configuration file: {error}")
@@ -36,10 +37,10 @@ class MQTTDataGenerator:
         interval_secs = self.interval_ms / 1000.0
 
         while True:
-            sensor_id = random.choice(attributes)
-            sensor = self.sensors[sensor_id]
+            sensor_id: str = choice(attributes)
+            sensor: Dict = self.sensors[sensor_id]
             lower_bound, upper_bound = sensor.get("range")
-            value = round(random.uniform(lower_bound, upper_bound), 3)
+            value = round(uniform(lower_bound, upper_bound), 3)
 
             data = {
                 "id": sensor_id,
@@ -52,7 +53,7 @@ class MQTTDataGenerator:
                 if value is not None:
                     data[attribute] = value
 
-            payload = json.dumps(data)
+            payload = dumps(data)
 
             if self.verbose:
                 print(f"{self.topic}:{payload}")
@@ -60,7 +61,7 @@ class MQTTDataGenerator:
             mqtt.publish(mqtt_topic=self.topic,
                          payload=payload,
                          quality_of_service=0)
-            time.sleep(interval_secs)
+            sleep(interval_secs)
 
 
 if __name__ == "__main__":

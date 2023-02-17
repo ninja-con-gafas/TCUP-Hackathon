@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Prerequisites:
 #   Ubuntu 20.04 LTS
 #   A non-root user with sudo rights
@@ -5,7 +7,7 @@
 echo "Download package information from all configured sources"
 sudo apt-get update
 
-echo "Add deadsnakes to Personal Package Archive PPA"
+echo "Add deadsnakes to Personal Package Archive"
 sudo add-apt-repository -y ppa:deadsnakes/ppa
 
 echo "Install git Python version 3.7, pip3 and venv module version 3.7"

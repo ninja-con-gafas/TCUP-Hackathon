@@ -58,7 +58,7 @@ class MQTT:
                                         properties=properties)
 
     def print_message(self, mqtt_topic: str) -> None:
-        def on_message(client_: Client, userdata: Any, message: MQTTMessage):
+        def on_message(client_: Client, userdata: Any, message: MQTTMessage) -> None:
             print(f"Message: {message.payload.decode()}")
 
         self.mqtt_client.subscribe(mqtt_topic)
