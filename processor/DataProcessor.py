@@ -5,6 +5,29 @@ from pyspark.sql import Row, SparkSession
 from pyspark.sql.functions import col, from_json, lit
 from pyspark.sql.types import ArrayType, IntegerType, LongType, StringType, StructField, StructType
 from pyspark.streaming import DStream, StreamingContext
+from typing import Tuple
+
+
+def get_mysql_connector() -> str:
+    return "venv/lib/python3.7/site-packages/pyspark/jars/mysql-connector-j-8.0.32.jar"
+
+
+def get_credentials() -> Tuple[str, str]:
+    user = "root"
+    password = ""
+    return user, password
+
+
+def get_database_url() -> str:
+    host: str = "127.0.0.1"
+    port: str = "3306"
+    data_base: str = "ICE_PLANT"
+    tls_version: str = "TLSv1.2"
+    return "jdbc:mysql://" + \
+        host + \
+        ":" + port + \
+        "/" + data_base + \
+        "?enabledTLSProtocols=" + tls_version
 
 
 def get_stream_schema() -> StructType:
@@ -69,7 +92,8 @@ class DataProcessor:
         self.spark_context = self.get_spark_context()
         self.spark_streaming_context = self.create_spark_streaming_context()
         self.spark = self.get_spark_session()
-        self.stream = self.spark.createDataFrame([], StructType([]))
+        self.spark.conf.set(key="spark.jars",
+                            value=get_mysql_connector())
         self.spark_context.setLogLevel('ERROR')
 
     def get_spark_context(self):
@@ -94,34 +118,43 @@ class DataProcessor:
                                       username=username,
                                       password=password)
 
-    def create_stream_data_frame(self,
-                                 time: datetime,
-                                 rdd: RDD) -> None:
+    def process(self,
+                time: datetime,
+                rdd: RDD) -> None:
         if not rdd.isEmpty():
-            self.stream = self.spark \
-                .createDataFrame(rdd.map(lambda stream: Row(stream))) \
+            stream = self.spark \
+                .createDataFrame(rdd.map(lambda data: Row(data))) \
                 .select(from_json(col=col("_1"),
                                   schema=get_stream_schema()).alias("stream"))
 
-            self.stream = self.stream \
-                .withColumn("topic", self.stream["stream.data"].getItem(0)) \
-                .withColumn("payload", from_json(col=self.stream["stream.data"].getItem(1),
+            stream = stream \
+                .withColumn("topic", stream["stream.data"].getItem(0)) \
+                .withColumn("payload", from_json(col=stream["stream.data"].getItem(1),
                                                  schema=get_payload_schema())) \
                 .withColumn("metrics", from_json(col=col("payload.metrics"),
                                                  schema=get_metrics_schema())) \
-                .select("topic",
-                        "payload.timestamp",
+                .select("payload.timestamp",
                         "payload.timestamp_rx",
-                        "payload.seq",
+                        "topic",
                         "metrics.name",
                         "metrics.value")
+
+            user, password = get_credentials()
+            stream.write.format("jdbc") \
+                .option("driver", "com.mysql.jdbc.Driver") \
+                .option("url", get_database_url()) \
+                .option("user", user) \
+                .option("password", password) \
+                .option("dbtable", "STREAMING_DATA") \
+                .mode("append") \
+                .save()
             if self.verbose:
                 print(str(time))
-                self.stream.show(truncate=False)
+                stream.show(truncate=False)
 
-    def process(self,
-                stream: DStream) -> None:
-        stream.foreachRDD(self.create_stream_data_frame)
+    def start(self,
+              stream: DStream) -> None:
+        stream.foreachRDD(self.process)
         self.spark_streaming_context.start()
         self.spark_streaming_context.awaitTermination()
 
@@ -132,4 +165,4 @@ if __name__ == "__main__":
                                    verbose=True)
     mqtt_sparkplug_b_stream = data_processor.create_mqtt_sparkplug_b_stream(broker_url="tcp://127.0.0.1:1883",
                                                                             topic="ice_plant")
-    data_processor.process(mqtt_sparkplug_b_stream)
+    data_processor.start(mqtt_sparkplug_b_stream)
