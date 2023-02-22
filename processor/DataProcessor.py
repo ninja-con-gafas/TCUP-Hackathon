@@ -1,8 +1,8 @@
 from datetime import datetime
 from mqtt import MQTTUtils
 from pyspark import RDD, SparkContext
-from pyspark.sql import Row, SparkSession
-from pyspark.sql.functions import col, from_json, lit
+from pyspark.sql import DataFrame, Row, SparkSession
+from pyspark.sql.functions import col, from_json
 from pyspark.sql.types import ArrayType, IntegerType, LongType, StringType, StructField, StructType
 from pyspark.streaming import DStream, StreamingContext
 from typing import Tuple
@@ -28,6 +28,44 @@ def get_database_url() -> str:
         ":" + port + \
         "/" + data_base + \
         "?enabledTLSProtocols=" + tls_version
+
+
+def get_table_name() -> str:
+    return "STREAMING_DATA"
+
+
+def create_stream_data_frame(spark: SparkSession,
+                             rdd: RDD) -> DataFrame:
+    return spark \
+        .createDataFrame(rdd.map(lambda data: Row(data))) \
+        .select(from_json(col=col("_1"),
+                          schema=get_stream_schema()).alias("stream"))
+
+
+def flatten_stream_data_frame(stream_data_frame: DataFrame) -> DataFrame:
+    return stream_data_frame \
+        .withColumn("topic", stream_data_frame["stream.data"].getItem(0)) \
+        .withColumn("payload", from_json(col=stream_data_frame["stream.data"].getItem(1),
+                                         schema=get_payload_schema())) \
+        .withColumn("metrics", from_json(col=col("payload.metrics"),
+                                         schema=get_metrics_schema())) \
+        .select("payload.timestamp",
+                "payload.timestamp_rx",
+                "topic",
+                "metrics.name",
+                "metrics.value")
+
+
+def ingest_stream_data_frame(stream_data_frame: DataFrame) -> None:
+    user, password = get_credentials()
+    stream_data_frame.write.format("jdbc") \
+        .option("driver", "com.mysql.jdbc.Driver") \
+        .option("url", get_database_url()) \
+        .option("user", user) \
+        .option("password", password) \
+        .option("dbtable", get_table_name()) \
+        .mode("append") \
+        .save()
 
 
 def get_stream_schema() -> StructType:
@@ -89,22 +127,22 @@ class DataProcessor:
         self.app_name = app_name
         self.batch_duration = batch_duration
         self.verbose = verbose
-        self.spark_context = self.get_spark_context()
-        self.spark_streaming_context = self.create_spark_streaming_context()
-        self.spark = self.get_spark_session()
+        self.spark_context: SparkContext = self.get_spark_context()
+        self.spark_streaming_context: StreamingContext = self.create_spark_streaming_context()
+        self.spark: SparkSession = self.get_spark_session()
         self.spark.conf.set(key="spark.jars",
                             value=get_mysql_connector())
         self.spark_context.setLogLevel('ERROR')
 
-    def get_spark_context(self):
+    def get_spark_context(self) -> SparkContext:
         return SparkContext(appName=self.app_name) \
             .getOrCreate()
 
-    def create_spark_streaming_context(self):
+    def create_spark_streaming_context(self) -> StreamingContext:
         return StreamingContext(sparkContext=self.spark_context,
                                 batchDuration=self.batch_duration)
 
-    def get_spark_session(self):
+    def get_spark_session(self) -> SparkSession:
         return SparkSession(sparkContext=self.spark_context)
 
     def create_mqtt_sparkplug_b_stream(self,
@@ -122,32 +160,10 @@ class DataProcessor:
                 time: datetime,
                 rdd: RDD) -> None:
         if not rdd.isEmpty():
-            stream = self.spark \
-                .createDataFrame(rdd.map(lambda data: Row(data))) \
-                .select(from_json(col=col("_1"),
-                                  schema=get_stream_schema()).alias("stream"))
-
-            stream = stream \
-                .withColumn("topic", stream["stream.data"].getItem(0)) \
-                .withColumn("payload", from_json(col=stream["stream.data"].getItem(1),
-                                                 schema=get_payload_schema())) \
-                .withColumn("metrics", from_json(col=col("payload.metrics"),
-                                                 schema=get_metrics_schema())) \
-                .select("payload.timestamp",
-                        "payload.timestamp_rx",
-                        "topic",
-                        "metrics.name",
-                        "metrics.value")
-
-            user, password = get_credentials()
-            stream.write.format("jdbc") \
-                .option("driver", "com.mysql.jdbc.Driver") \
-                .option("url", get_database_url()) \
-                .option("user", user) \
-                .option("password", password) \
-                .option("dbtable", "STREAMING_DATA") \
-                .mode("append") \
-                .save()
+            stream = create_stream_data_frame(spark=self.spark,
+                                              rdd=rdd)
+            stream = flatten_stream_data_frame(stream_data_frame=stream)
+            ingest_stream_data_frame(stream_data_frame=stream)
             if self.verbose:
                 print(str(time))
                 stream.show(truncate=False)
