@@ -1,6 +1,6 @@
 from json import load, dumps
 from random import choice, uniform
-from sys import argv
+from sys import argv, exit
 from time import sleep
 from typing import Dict
 from wrapper.MQTT import MQTT
@@ -68,4 +68,4 @@ if __name__ == "__main__":
     if len(argv) == 2:
         MQTTDataGenerator(argv[1]).generate_data()
     else:
-        print("Please provide a configuration file as command line argument.")
+        exit("Please provide a configuration file as command line argument.")

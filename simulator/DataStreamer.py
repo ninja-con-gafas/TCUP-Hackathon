@@ -1,5 +1,5 @@
 from json import dumps, load
-from sys import argv
+from sys import argv, exit
 from typing import Dict
 from wrapper.MQTT import MQTT
 from wrapper.MQTTSparkplugB import MQTTSparkplugB, MqttSpbEntityApplication
@@ -62,4 +62,4 @@ if __name__ == "__main__":
         streamer.connect_mqtt_broker()
         streamer.loop()
     else:
-        print("Please provide a configuration file as command line argument.")
+        exit("Please provide a configuration file as command line argument.")

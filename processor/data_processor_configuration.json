@@ -1,0 +1,21 @@
+{
+  "spark": {
+    "app_name": "process_mqtt_sparkplug_b_data",
+    "batch_duration": 1,
+    "verbose": true
+  },
+  "mqtt": {
+    "broker_url": "tcp://127.0.0.1:1883",
+    "spb_group_name": "ice_plant"
+  },
+  "mysql": {
+    "database_url": "jdbc:mysql://127.0.0.1:3306/ICE_PLANT?enabledTLSProtocols=TLSv1.2",
+    "user": "root",
+    "password": "",
+    "table_name": "STREAMING_DATA"
+  },
+  "environment_path_relative":
+  {
+    "mysql_connector": "venv/lib/python3.7/site-packages/pyspark/jars/mysql-connector-j-8.0.32.jar"
+  }
+}

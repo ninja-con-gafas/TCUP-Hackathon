@@ -1,37 +1,13 @@
 from datetime import datetime
+from json import load
 from mqtt import MQTTUtils
 from pyspark import RDD, SparkContext
 from pyspark.sql import DataFrame, Row, SparkSession
 from pyspark.sql.functions import col, from_json
 from pyspark.sql.types import ArrayType, IntegerType, LongType, StringType, StructField, StructType
 from pyspark.streaming import DStream, StreamingContext
-from typing import Tuple
-
-
-def get_mysql_connector() -> str:
-    return "venv/lib/python3.7/site-packages/pyspark/jars/mysql-connector-j-8.0.32.jar"
-
-
-def get_credentials() -> Tuple[str, str]:
-    user = "root"
-    password = ""
-    return user, password
-
-
-def get_database_url() -> str:
-    host: str = "127.0.0.1"
-    port: str = "3306"
-    data_base: str = "ICE_PLANT"
-    tls_version: str = "TLSv1.2"
-    return "jdbc:mysql://" + \
-        host + \
-        ":" + port + \
-        "/" + data_base + \
-        "?enabledTLSProtocols=" + tls_version
-
-
-def get_table_name() -> str:
-    return "STREAMING_DATA"
+from sys import argv, exit
+from typing import Dict
 
 
 def create_stream_data_frame(spark: SparkSession,
@@ -54,18 +30,6 @@ def flatten_stream_data_frame(stream_data_frame: DataFrame) -> DataFrame:
                 "topic",
                 "metrics.name",
                 "metrics.value")
-
-
-def ingest_stream_data_frame(stream_data_frame: DataFrame) -> None:
-    user, password = get_credentials()
-    stream_data_frame.write.format("jdbc") \
-        .option("driver", "com.mysql.jdbc.Driver") \
-        .option("url", get_database_url()) \
-        .option("user", user) \
-        .option("password", password) \
-        .option("dbtable", get_table_name()) \
-        .mode("append") \
-        .save()
 
 
 def get_stream_schema() -> StructType:
@@ -120,19 +84,37 @@ def get_metrics_schema() -> StructType:
 
 class DataProcessor:
 
-    def __init__(self,
-                 app_name: str,
-                 batch_duration: int,
-                 verbose: bool = False):
-        self.app_name = app_name
-        self.batch_duration = batch_duration
-        self.verbose = verbose
-        self.spark_context: SparkContext = self.get_spark_context()
-        self.spark_streaming_context: StreamingContext = self.create_spark_streaming_context()
-        self.spark: SparkSession = self.get_spark_session()
-        self.spark.conf.set(key="spark.jars",
-                            value=get_mysql_connector())
-        self.spark_context.setLogLevel('ERROR')
+    def __init__(self, configuration_file_path):
+        try:
+            with open(file=configuration_file_path, mode='r') as configuration_file:
+                configurations: Dict = load(configuration_file)
+                spark_configuration: Dict = configurations.get("spark")
+                mqtt_configuration: Dict = configurations.get("mqtt")
+                mysql_configuration: Dict = configurations.get("mysql")
+                environment_path: Dict = configurations.get("environment_path_relative")
+
+                self.app_name: str = spark_configuration.get("app_name")
+                self.batch_duration: int = spark_configuration.get("batch_duration")
+                self.verbose: bool = spark_configuration.get("verbose")
+
+                self.broker_url: str = mqtt_configuration.get("broker_url")
+                self.topic: str = mqtt_configuration.get("spb_group_name")
+
+                self.database_url: str = mysql_configuration.get("database_url")
+                self.user: str = mysql_configuration.get("user")
+                self.password: str = mysql_configuration.get("password")
+                self.table_name: str = mysql_configuration.get("table_name")
+
+                mysql_connector_path: str = environment_path.get("mysql_connector")
+
+                self.spark_context: SparkContext = self.get_spark_context()
+                self.spark_streaming_context: StreamingContext = self.create_spark_streaming_context()
+                self.spark: SparkSession = self.get_spark_session()
+                self.spark.conf.set(key="spark.jars",
+                                    value=mysql_connector_path)
+                self.spark_context.setLogLevel('ERROR')
+        except IOError as error:
+            print(f"Error opening the configuration file: {error}")
 
     def get_spark_context(self) -> SparkContext:
         return SparkContext(appName=self.app_name) \
@@ -145,16 +127,22 @@ class DataProcessor:
     def get_spark_session(self) -> SparkSession:
         return SparkSession(sparkContext=self.spark_context)
 
-    def create_mqtt_sparkplug_b_stream(self,
-                                       broker_url: str,
-                                       topic: str,
-                                       username: str = None,
-                                       password: str = None) -> DStream:
+    def create_mqtt_sparkplug_b_stream(self) -> DStream:
         return MQTTUtils.createStream(ssc=self.spark_streaming_context,
-                                      brokerUrl=broker_url,
-                                      topic=topic,
-                                      username=username,
-                                      password=password)
+                                      brokerUrl=self.broker_url,
+                                      topic=self.topic,
+                                      username=None,
+                                      password=None)
+
+    def ingest_stream_data_frame(self, stream_data_frame: DataFrame) -> None:
+        stream_data_frame.write.format("jdbc") \
+            .option("driver", "com.mysql.jdbc.Driver") \
+            .option("url", self.database_url) \
+            .option("user", self.user) \
+            .option("password", self.password) \
+            .option("dbtable", self.table_name) \
+            .mode("append") \
+            .save()
 
     def process(self,
                 time: datetime,
@@ -163,7 +151,7 @@ class DataProcessor:
             stream = create_stream_data_frame(spark=self.spark,
                                               rdd=rdd)
             stream = flatten_stream_data_frame(stream_data_frame=stream)
-            ingest_stream_data_frame(stream_data_frame=stream)
+            self.ingest_stream_data_frame(stream_data_frame=stream)
             if self.verbose:
                 print(str(time))
                 stream.show(truncate=False)
@@ -176,9 +164,9 @@ class DataProcessor:
 
 
 if __name__ == "__main__":
-    data_processor = DataProcessor(app_name="process_mqtt_sparkplug_b_data",
-                                   batch_duration=1,
-                                   verbose=True)
-    mqtt_sparkplug_b_stream = data_processor.create_mqtt_sparkplug_b_stream(broker_url="tcp://127.0.0.1:1883",
-                                                                            topic="ice_plant")
-    data_processor.start(mqtt_sparkplug_b_stream)
+    if len(argv) == 2:
+        data_processor = DataProcessor(argv[1])
+        mqtt_sparkplug_b_stream = data_processor.create_mqtt_sparkplug_b_stream()
+        data_processor.start(mqtt_sparkplug_b_stream)
+    else:
+        exit("Please provide a configuration file as command line argument.")

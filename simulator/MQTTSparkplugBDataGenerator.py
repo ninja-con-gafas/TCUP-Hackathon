@@ -1,6 +1,6 @@
 from json import load
 from random import choice, uniform
-from sys import argv
+from sys import argv, exit
 from time import sleep
 from typing import Dict, List
 from wrapper.MQTTSparkplugB import MQTTSparkplugB
@@ -86,4 +86,4 @@ if __name__ == "__main__":
     if len(argv) == 2:
         MQTTSparkplugBDataGenerator(argv[1]).generate_data()
     else:
-        print("Please provide a configuration file as command line argument.")
+        exit("Please provide a configuration file as command line argument.")
