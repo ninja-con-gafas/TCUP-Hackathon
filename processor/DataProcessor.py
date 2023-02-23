@@ -3,33 +3,11 @@ from json import load
 from mqtt import MQTTUtils
 from pyspark import RDD, SparkContext
 from pyspark.sql import DataFrame, Row, SparkSession
-from pyspark.sql.functions import col, from_json
-from pyspark.sql.types import ArrayType, IntegerType, LongType, StringType, StructField, StructType
+from pyspark.sql.functions import col, from_json, from_utc_timestamp
+from pyspark.sql.types import ArrayType, FloatType, IntegerType, LongType, StringType, StructField, StructType
 from pyspark.streaming import DStream, StreamingContext
 from sys import argv, exit
 from typing import Dict
-
-
-def create_stream_data_frame(spark: SparkSession,
-                             rdd: RDD) -> DataFrame:
-    return spark \
-        .createDataFrame(rdd.map(lambda data: Row(data))) \
-        .select(from_json(col=col("_1"),
-                          schema=get_stream_schema()).alias("stream"))
-
-
-def flatten_stream_data_frame(stream_data_frame: DataFrame) -> DataFrame:
-    return stream_data_frame \
-        .withColumn("topic", stream_data_frame["stream.data"].getItem(0)) \
-        .withColumn("payload", from_json(col=stream_data_frame["stream.data"].getItem(1),
-                                         schema=get_payload_schema())) \
-        .withColumn("metrics", from_json(col=col("payload.metrics"),
-                                         schema=get_metrics_schema())) \
-        .select("payload.timestamp",
-                "payload.timestamp_rx",
-                "topic",
-                "metrics.name",
-                "metrics.value")
 
 
 def get_stream_schema() -> StructType:
@@ -80,6 +58,58 @@ def get_metrics_schema() -> StructType:
                         dataType=StringType(),
                         nullable=False)
         ])
+
+
+def get_value_schema() -> StructType:
+    return StructType(
+        [
+            StructField(name="device_type",
+                        dataType=StringType(),
+                        nullable=False),
+            StructField(name="description",
+                        dataType=StringType(),
+                        nullable=False),
+            StructField(name="measure",
+                        dataType=FloatType(),
+                        nullable=False),
+            StructField(name="unit",
+                        dataType=StringType(),
+                        nullable=False)
+        ])
+
+
+def create_stream_data_frame(spark: SparkSession,
+                             rdd: RDD) -> DataFrame:
+    return spark \
+        .createDataFrame(rdd.map(lambda data: Row(data))) \
+        .select(from_json(col=col("_1"),
+                          schema=get_stream_schema()).alias("stream"))
+
+
+def flatten_stream_data_frame(stream_data_frame: DataFrame) -> DataFrame:
+    return stream_data_frame \
+        .withColumn("topic", stream_data_frame["stream.data"].getItem(0)) \
+        .withColumn("payload", from_json(col=stream_data_frame["stream.data"].getItem(1),
+                                         schema=get_payload_schema())) \
+        .withColumn("metrics", from_json(col=col("payload.metrics"),
+                                         schema=get_metrics_schema())) \
+        .withColumn("value", from_json(col=col("metrics.value"),
+                                       schema=get_value_schema())) \
+        .withColumn("timestamp",
+                    from_utc_timestamp(timestamp=(col("metrics.timestamp") / 1000).cast("timestamp"),
+                                       tz="IST")) \
+        .withColumn("timestamp_rx",
+                    from_utc_timestamp(timestamp=(col("payload.timestamp_rx") / 1000).cast("timestamp"),
+                                       tz="IST")) \
+        .select("timestamp",
+                "timestamp_rx",
+                "topic",
+                "metrics.name",
+                "value.device_type",
+                "value.description",
+                "value.measure",
+                "value.unit") \
+        .withColumnRenamed("name", "device_name")
 
 
 class DataProcessor:

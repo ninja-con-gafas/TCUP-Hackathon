@@ -70,8 +70,16 @@ class MQTTSparkplugBDataGenerator:
             device_id: str = attributes.get("device_id")
             device_configuration: Dict = self.devices.get(device_id)
 
+            device_type: str = attributes.get("device_type")
+            unit: str = attributes.get("unit")
+            description: str = attributes.get("description")
             lower_bound, upper_bound = device_configuration.get("range")
-            value = round(uniform(lower_bound, upper_bound), 3)
+            value = {
+                "device_type": device_type,
+                "description": description,
+                "measure": round(uniform(lower_bound, upper_bound), 3),
+                "unit": unit
+            }
             entity.set_data_value(name=device_id,
                                   value=str(value))
 
