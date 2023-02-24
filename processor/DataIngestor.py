@@ -16,8 +16,8 @@ def get_stream_schema() -> StructType:
             StructField(name="data",
                         dataType=ArrayType(
                             elementType=StringType(),
-                            containsNull=False),
-                        nullable=False)
+                            containsNull=True),
+                        nullable=True)
         ])
 
 
@@ -26,16 +26,16 @@ def get_payload_schema() -> StructType:
         [
             StructField(name="timestamp",
                         dataType=StringType(),
-                        nullable=False),
+                        nullable=True),
             StructField(name="metrics",
                         dataType=StringType(),
-                        nullable=False),
+                        nullable=True),
             StructField(name="seq",
                         dataType=StringType(),
-                        nullable=False),
+                        nullable=True),
             StructField(name="timestamp_rx",
                         dataType=LongType(),
-                        nullable=False)
+                        nullable=True)
         ])
 
 
@@ -44,19 +44,19 @@ def get_metrics_schema() -> StructType:
         [
             StructField(name="name",
                         dataType=StringType(),
-                        nullable=False),
+                        nullable=True),
             StructField(name="timestamp",
                         dataType=StringType(),
-                        nullable=False),
+                        nullable=True),
             StructField(name="datatype",
                         dataType=IntegerType(),
-                        nullable=False),
+                        nullable=True),
             StructField(name="stringValue",
                         dataType=StringType(),
-                        nullable=False),
+                        nullable=True),
             StructField(name="value",
                         dataType=StringType(),
-                        nullable=False)
+                        nullable=True)
         ])
 
 
@@ -65,16 +65,16 @@ def get_value_schema() -> StructType:
         [
             StructField(name="device_type",
                         dataType=StringType(),
-                        nullable=False),
+                        nullable=True),
             StructField(name="description",
                         dataType=StringType(),
-                        nullable=False),
+                        nullable=True),
             StructField(name="measure",
                         dataType=FloatType(),
-                        nullable=False),
+                        nullable=True),
             StructField(name="unit",
                         dataType=StringType(),
-                        nullable=False)
+                        nullable=True)
         ])
 
 

@@ -1,0 +1,26 @@
+{
+  "spark": {
+    "app_name": "process_streaming_data",
+    "batches": {
+      "second": true,
+      "minute": true,
+      "hour": true,
+      "day": true,
+      "month": true,
+      "year": true
+    },
+    "verbose": true
+  },
+  "mysql": {
+    "database_url": "jdbc:mysql://127.0.0.1:3306/ICE_PLANT?enabledTLSProtocols=TLSv1.2",
+    "user": "root",
+    "password": "",
+    "table_names": {
+      "streaming_data": "STREAMING_DATA",
+      "processed_data": "PROCESSED_DATA"
+    }
+  },
+  "environment_paths": {
+    "mysql_connector": "venv/lib/python3.7/site-packages/pyspark/jars/mysql-connector-j-8.0.32.jar"
+  }
+}
