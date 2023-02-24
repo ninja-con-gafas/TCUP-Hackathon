@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo ">>> Start the Apache Spark Streaming Application"
-spark-submit --packages org.apache.bahir:spark-streaming-mqtt_2.11:2.4.0 "processor/DataProcessor.py" "processor/data_processor_configuration.json" &
+spark-submit --packages org.apache.bahir:spark-streaming-mqtt_2.11:2.4.0 "processor/DataIngestor.py" "processor/data_ingestor_configuration.json" &
 echo ">>> Wait for 30 seconds to get the application running"
 sleep 30
 

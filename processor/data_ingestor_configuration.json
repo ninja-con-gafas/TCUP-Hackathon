@@ -1,6 +1,6 @@
 {
   "spark": {
-    "app_name": "process_mqtt_sparkplug_b_data",
+    "app_name": "ingest_mqtt_sparkplug_b_data",
     "batch_duration": 1,
     "verbose": true
   },
@@ -14,7 +14,7 @@
     "password": "",
     "table_name": "STREAMING_DATA"
   },
-  "environment_path_relative":
+  "environment_paths":
   {
     "mysql_connector": "venv/lib/python3.7/site-packages/pyspark/jars/mysql-connector-j-8.0.32.jar"
   }

@@ -1,4 +1,3 @@
-from time import sleep
 from wrapper.MQTTSparkplugB import MQTTSparkplugB
 
 debug_info = True
@@ -14,4 +13,3 @@ mqtt_sparkplug_b_entity.connect_mqtt_broker()
 
 while True:
     mqtt_sparkplug_b_entity.print_message()
-    sleep(1000)

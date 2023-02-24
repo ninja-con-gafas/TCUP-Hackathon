@@ -97,10 +97,10 @@ def flatten_stream_data_frame(stream_data_frame: DataFrame) -> DataFrame:
                                        schema=get_value_schema())) \
         .withColumn("timestamp",
                     from_utc_timestamp(timestamp=(col("metrics.timestamp") / 1000).cast("timestamp"),
-                                       tz="IST")) \
+                                       tz="GMT")) \
         .withColumn("timestamp_rx",
                     from_utc_timestamp(timestamp=(col("payload.timestamp_rx") / 1000).cast("timestamp"),
-                                       tz="IST")) \
+                                       tz="GMT")) \
         .select("timestamp",
                 "timestamp_rx",
                 "topic",
@@ -112,7 +112,7 @@ def flatten_stream_data_frame(stream_data_frame: DataFrame) -> DataFrame:
         .withColumnRenamed("name", "device_name")
 
 
-class DataProcessor:
+class DataIngestor:
 
     def __init__(self, configuration_file_path):
         try:
@@ -121,7 +121,7 @@ class DataProcessor:
                 spark_configuration: Dict = configurations.get("spark")
                 mqtt_configuration: Dict = configurations.get("mqtt")
                 mysql_configuration: Dict = configurations.get("mysql")
-                environment_path: Dict = configurations.get("environment_path_relative")
+                environment_paths: Dict = configurations.get("environment_paths")
 
                 self.app_name: str = spark_configuration.get("app_name")
                 self.batch_duration: int = spark_configuration.get("batch_duration")
@@ -135,7 +135,7 @@ class DataProcessor:
                 self.password: str = mysql_configuration.get("password")
                 self.table_name: str = mysql_configuration.get("table_name")
 
-                mysql_connector_path: str = environment_path.get("mysql_connector")
+                mysql_connector_path: str = environment_paths.get("mysql_connector")
 
                 self.spark_context: SparkContext = self.get_spark_context()
                 self.spark_streaming_context: StreamingContext = self.create_spark_streaming_context()
@@ -195,8 +195,8 @@ class DataProcessor:
 
 if __name__ == "__main__":
     if len(argv) == 2:
-        data_processor = DataProcessor(argv[1])
-        mqtt_sparkplug_b_stream = data_processor.create_mqtt_sparkplug_b_stream()
-        data_processor.start(mqtt_sparkplug_b_stream)
+        data_ingestor = DataIngestor(argv[1])
+        mqtt_sparkplug_b_stream = data_ingestor.create_mqtt_sparkplug_b_stream()
+        data_ingestor.start(mqtt_sparkplug_b_stream)
     else:
         exit("Please provide a configuration file as command line argument.")
