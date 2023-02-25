@@ -1,0 +1,10 @@
+{
+  "flask": {
+    "table_name": "PROCESSED_DATA",
+    "configurations": {
+      "SQLALCHEMY_DATABASE_URI": "mysql+mysqlconnector://root:@127.0.0.1/ICE_PLANT",
+      "SQLALCHEMY_TRACK_MODIFICATIONS": false
+    },
+    "debug": true
+  }
+}

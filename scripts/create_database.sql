@@ -23,5 +23,6 @@ CREATE TABLE `PROCESSED_DATA` (
     `MEAN_MEASURE`			FLOAT,
     `MINIMUM_MEASURE`		FLOAT,
     `UNIT`			        VARCHAR(255),
-    `BATCH`			        VARCHAR(255)
+    `BATCH`			        VARCHAR(255),
+    PRIMARY KEY             (`TIMESTAMP_RX`, `DEVICE_NAME`, `BATCH`)
 );
